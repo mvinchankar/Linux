@@ -1,5 +1,11 @@
 #!/bin/bash -x 
 read -p "How many times you want to flip the coin: " numberOfCounts 
+HEAD=0;
+TAIL=0;
+HEADHEAD=0;
+HEADTAIL=0;
+TAILHEAD=0;
+TAILTAIL=0;
 HEADHEADHEAD=0;
 TAILTAILTAIL=0;
 HEADTAILTAIL=0;
@@ -9,7 +15,53 @@ TAILHEADTAIL=0;
 TAILTAILHEAD=0;
 HEADHEADTAIL=0;
 declare -A Dictionary
-function flipCoin()
+function flipCoinSingle()
+{
+
+for(( count=0; count<$1; count++ ))
+do  
+  guess=$((RANDOM%2))
+  if [ 1 -eq $guess ]
+  then 
+      TAIL=$(($TAIL+1))
+      Dictionary[((TAIL))]=$TAIL
+  else
+      HEAD=$(($HEAD+1))
+      Dictionary[((HEAD))]=$HEAD
+  fi
+done
+}
+function flipCoinDoublets()
+{
+
+for(( count=0; count<$1; count++ ))
+do  
+  guess=$((RANDOM%2))
+  guess1=$((RANDOM%2))
+  if [ $guess -eq $guess1 ]
+  then 
+      if [ 1 -eq $guess ]
+      then  
+          TAILTAIL=$(($TAILTAIL+1))
+     	  Dictionary[((TAILTAIL))]=$TAILTAIL
+      else
+          HEADHEAD=$(($HEADHEAD+1))
+          Dictionary[((HEADHEAD))]=$HEADHEAD
+      fi
+  else
+      if [ 1 -eq $guess ]
+      then 
+          TAILHEAD=$(($TAILHEAD+1))
+          Dictionary[((TAILHEAD))]=$TAILHEAD
+      else
+          HEADTAIL=$(($HEADTAIL+1))
+          Dictionary[((HEADTAIL))]=$HEADTAIL  
+      fi  
+      
+  fi
+done
+}
+function flipCoinTriplets()
 {
 
 for(( count=0; count<$1; count++ ))
@@ -65,6 +117,18 @@ done
 }
 function Percentage()
 {
+temp=$(($HEAD * 100))
+HeadPercentage=$(($temp/$1))
+temp=$(($TAIL * 100))
+TailPercentage=$(($temp/$1))
+temp=$(($HEADHEAD * 100))
+HEADHEADPercentage=$(($temp/$1))
+temp=$(($TAILTAIL * 100))
+TAILTAILPercentage=$(($temp/$1))
+temp=$(($TAILHEAD * 100))
+TAILHEADPercentage=$(($temp/$1))
+temp=$(($HEADTAIL * 100))
+HEADTAILPercentage=$(($temp/$1))
 temp=$(($TAILHEADHEAD * 100))
 TAILHEADHEADPercentage=$(($temp/$1))
 temp=$(($TAILTAILHEAD * 100))
@@ -81,11 +145,11 @@ temp=$(($HEADHEADTAIL * 100))
 HEADHEADTAILPercentage=$(($temp/$1))
 temp=$(($HEADTAILHEAD * 100))
 HEADTAILHEADPercentage=$(($temp/$1))
-echo TAILTAILTAILPercentage:$TAILTAILTAILPercentage HEADHEADHEADPercentage:$HEADHEADHEADPercentage 
-echo HEADTAILTAILPercentage:$HEADTAILTAILPercentage TAILHEADHEADPercentage:$TAILHEADHEADPercentage
-echo TAILTAILHEADPercentage:$TAILTAILHEADPercentage HEADHEADTAILPercentage:$HEADHEADTAILPercentage
-echo TAILHEADTAILPercentage:$TAILHEADTAILPercentage HEADTAILHEADPerentage:$HEADTAILHEADPercentage 
 }
 
-flipCoin $numberOfCounts
+flipCoinSingle $numberOfCounts
+flipCoinDoublets $numberOfCounts
+flipCoinTriplets $numberOfCounts
 Percentage $numberOfCounts
+echo $(printf " %s\n " ${Dictionary[@]} | sort -nr | head -1 )
+
